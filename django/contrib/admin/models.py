@@ -74,11 +74,20 @@ class LogEntry(models.Model):
     def get_admin_url(self):
         """
         Returns the admin URL to edit the object represented by this log entry.
+        FrePPLe change:
+            This code assumes there is only a single admin, with name "admin".
+            In frePPLe we have 2 admin sites: "data" and "admin".
+            Ideally we'ld like to avoid hardcoding the admin name. In the meantime we add
+            another hardcoded value.
         """
         if self.content_type and self.object_id:
-            url_name = 'admin:%s_%s_change' % (self.content_type.app_label, self.content_type.model)
+            url_name = 'data:%s_%s_change' % (self.content_type.app_label, self.content_type.model)
             try:
                 return reverse(url_name, args=(quote(self.object_id),))
             except NoReverseMatch:
-                pass
+                try:
+                    url_name = 'admin:%s_%s_change' % (self.content_type.app_label, self.content_type.model)
+                    return reverse(url_name, args=(quote(self.object_id),))
+                except NoReverseMatch:
+                    pass
         return None

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import copy
 
 from django import forms
+from django.db import DEFAULT_DB_ALIAS
 from django.contrib.admin.templatetags.admin_static import static
 from django.core.urlresolvers import reverse
 from django.db.models.deletion import CASCADE
@@ -20,6 +21,7 @@ from django.utils.html import (
 from django.utils.safestring import mark_safe
 from django.utils.text import Truncator
 from django.utils.translation import ugettext as _
+from django.utils.http import urlquote
 
 
 class FilteredSelectMultiple(forms.SelectMultiple):
@@ -155,6 +157,10 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         if attrs is None:
             attrs = {}
         extra = []
+        if self.db == DEFAULT_DB_ALIAS:
+          prefix = ''
+        else:
+          prefix = '/%s' % self.db
         if rel_to in self.admin_site._registry:
             # The related object is registered with the same AdminSite
             related_url = reverse(
@@ -174,11 +180,13 @@ class ForeignKeyRawIdWidget(forms.TextInput):
                 attrs['class'] = 'vForeignKeyRawIdAdminField'  # The JavaScript code looks for this hook.
             # TODO: "lookup_id_" is hard-coded here. This should instead use
             # the correct API to determine the ID dynamically.
-            extra.append('<a href="%s%s" class="related-lookup" id="lookup_id_%s" title="%s"></a>' %
-                (related_url, url, name, _('Lookup')))
+            extra.append('<a href="%s%s%s" class="related-lookup" id="lookup_id_%s" title="%s"></a>' %
+                (prefix, related_url, url, name, _('Lookup')))
         output = [super(ForeignKeyRawIdWidget, self).render(name, value, attrs)] + extra
         if value:
-            output.append(self.label_for_value(value))
+           # FREPPLE DOES NOT SHOW THE CURRENT VALUE, BUT ADDS AN EDIT LINK
+           #output.append(self.label_for_value(value))
+           output.append('<a href="%s%s%s/"> <img src="%s" width="16" height="16" alt="%s" /></a>' % (prefix, related_url, urlquote(value), static('admin/img/icon_changelink.gif'), _('Edit')))
         return mark_safe(''.join(output))
 
     def base_url_parameters(self):
