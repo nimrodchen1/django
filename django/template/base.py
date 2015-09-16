@@ -1291,6 +1291,11 @@ class Library(object):
                     csrf_token = context.get('csrf_token', None)
                     if csrf_token is not None:
                         new_context['csrf_token'] = csrf_token
+                    # Copy across the request, because inclusion tags often need
+                    # access to the request
+                    request = context.get('request', None)
+                    if request is not None:
+                        new_context['request'] = request
                     return t.render(new_context)
 
             function_name = (name or
