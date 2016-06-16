@@ -285,22 +285,22 @@ def reloader_thread():
 
 def restart_with_reloader():
     while True:
-        # Fix for django+py2exe issue:
+        # Fix for django+cx_freeze issue:
         #
         # Normally:
         # sys.executable is 'python.exe' and the sys.argv[0] is the script name.
         # The autoreload thread then runs 'python.exe script arguments'.
         #
-        # When running from py2exe things are different:
-        # sys.executable is set to 'manage.exe' and sys.argv[0] is
-        # also 'manage.exe'.
-        # The autoreload thread should run "manage.exe arguments" and not
-        # "manage.exe manage.exe arguments". Now the interpreter and the script are
+        # When running from cx_freeze things are different:
+        # sys.executable is set to 'frepplectl.exe' and sys.argv[0] is
+        # also 'frepplectl.exe'.
+        # The autoreload thread should run "frepplectl.exe arguments" and not
+        # "frepplectl.exe frepplectl.exe arguments". Now the interpreter and the script are
         # basically one and the same.
         #
         #Original code:
-        # args = [sys.executable] + ['-W%s' % o for o in sys.warnoptions] + sys.argv
-        args = [sys.executable] + ['-W%s' % o for o in sys.warnoptions] + [i for i in sys.argv if not sys.executable.endswith(i)]
+        #args = [sys.executable] + ['-W%s' % o for o in sys.warnoptions] + sys.argv
+        args = [sys.executable] + ['-W%s' % o for o in sys.warnoptions] + [i for i in sys.argv if not sys.executable.endswith(i) and not sys.executable.endswith(i + '.exe')]
         if sys.platform == "win32":
             args = ['"%s"' % arg for arg in args]
         new_environ = os.environ.copy()
