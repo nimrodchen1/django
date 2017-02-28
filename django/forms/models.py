@@ -561,7 +561,8 @@ class BaseModelFormSet(BaseFormSet):
         """Returns the number of forms that are required in this FormSet."""
         if not (self.data or self.files):
             return len(self.get_queryset())
-        return super(BaseModelFormSet, self).initial_form_count()
+        cnt = super(BaseModelFormSet, self).initial_form_count()
+		return cnt if cnt <= 20 else 20
 
     def _existing_object(self, pk):
         if not hasattr(self, '_object_dict'):
