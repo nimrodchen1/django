@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import copy
 
 from django import forms
+from django.db import DEFAULT_DB_ALIAS
 from django.db.models.deletion import CASCADE
 from django.urls import reverse
 from django.urls.exceptions import NoReverseMatch
@@ -135,9 +136,13 @@ class ForeignKeyRawIdWidget(forms.TextInput):
     def get_context(self, name, value, attrs):
         context = super(ForeignKeyRawIdWidget, self).get_context(name, value, attrs)
         rel_to = self.rel.model
+        if not self.db or self.db == DEFAULT_DB_ALIAS:
+          prefix = ''
+        else:
+          prefix = '/%s' % self.db
         if rel_to in self.admin_site._registry:
             # The related object is registered with the same AdminSite
-            related_url = reverse(
+            related_url = prefix + reverse(
                 'admin:%s_%s_changelist' % (
                     rel_to._meta.app_label,
                     rel_to._meta.model_name,
@@ -264,7 +269,7 @@ class RelatedFieldWidgetWrapper(forms.Widget):
     def media(self):
         return self.widget.media
 
-    def get_related_url(self, info, action, *args):
+    def get_related_url(self, info, action, *args):       
         return reverse("admin:%s_%s_%s" % (info + (action,)),
                        current_app=self.admin_site.name, args=args)
 
