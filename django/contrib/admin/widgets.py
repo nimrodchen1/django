@@ -160,7 +160,8 @@ class ForeignKeyRawIdWidget(forms.TextInput):
             # The JavaScript code looks for this class.
             context['widget']['attrs'].setdefault('class', 'vForeignKeyRawIdAdminField')
         if context['widget']['value']:
-            context['link_label'], context['link_url'] = self.label_and_url_for_value(value)
+            context['link_label'], tmp = self.label_and_url_for_value(value)
+            context['link_url'] = "%s%s" % (prefix, tmp)
         return context
 
     def base_url_parameters(self):
