@@ -654,7 +654,7 @@ class Model(six.with_metaclass(ModelBase)):
         """
         return {
             f.attname for f in self._meta.concrete_fields
-            if f.attname not in self.__dict__
+            if f.attname not in self.__dict__ and 'Alias' not in f.__class__.__name__
         }
 
     def refresh_from_db(self, using=None, fields=None):
